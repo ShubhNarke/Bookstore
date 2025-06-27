@@ -29,7 +29,49 @@ router.put("/add-to-cart",authenticateToken,async(req,res)=>{
         return res.status(500).json({message:"An error occurred"});
         
     }
-})
+});
+
+
+// remove to cart 
+
+router.put("/remove-to-cart/:bookid",authenticateToken ,async(req,res)=>{
+    try {
+        const {bookidid} = req.params;
+        const {id} = req.headers;
+        await User.findByIdAndUpdate(id,{
+            $pull:{cart:bookid},
+        });
+
+        return res.json({
+            status:"success",
+            message:"Book removed from cart",
+        });
+       
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({Message:"An error occured"})
+    }
+});
+
+
+// get cart of particular user 
+
+router.get("/get-user-cart",authenticateToken,async(req,res)=>{
+    try {
+       const  {id} = req.headers;
+       const userData = await User.findById(id).populate("cart");
+       const cart = userData.cart.reverse();
+
+       return res.json({
+        status:"success",
+        data:cart,
+       });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message:"An errror occured"});
+    }
+});
+
 
 
 
