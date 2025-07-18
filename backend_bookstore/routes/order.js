@@ -38,9 +38,70 @@ router.post("/place-order", authenticateToken, async (req, res) => {
         console.log(error)
         return res.status(500).json({ message: "An error occcured" });
     }
+});
+ 
+
+// get order history of particular user 
+
+router.get("/get-order-history",authenticateToken,async(req,res)=>{
+    try {
+        const {id} = id.headers;
+        const userData = await user.findById(id).populate({
+            path:"order",
+            populate:{path:"book"},
+        })
+
+        const orderData = userData.orders.reverse();
+        return res.json({
+            status:"success",
+            data:orderData,
+        });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message:"an eorrror occurred"});
+    }
+});
+
+// get all orders admin 
+
+router.get("/get-all-orders",authenticateToken,async(req,res)=>{
+    try {
+        const userData = await Order.find()
+        .populate({
+            path:"book",
+        })
+        .populate({
+            path:"user",
+        })
+        .sort({createAt:-1});
+        return res.json({
+            status:"success",
+            data:userData,
+        });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message:"An error occured"});
+        
+    }
 })
 
+// update order -- admin 
 
+router.put("/update-status/:id",authenticateToken,async(req,res)=>{
+    try {
+        const {id} =  req.params;
+        await Order.findByIdAndUpdate(id,{status:req.body.status});
+        return res.json({
+            status:"success",
+            message:"Status updated successfully",
+        });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message:"An error occured"});
+    }
+})
 
 
 
