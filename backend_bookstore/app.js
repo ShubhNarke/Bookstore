@@ -1,27 +1,32 @@
 require("dotenv").config();
 const express = require('express');
+const cors = require("cors");
+
 const app = express();
+
+// Connect to MongoDB
+const conn = require("./conn/conn");
+conn();
+
+// Middleware
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 app.use(express.json());
 
-const conn = require("./conn/conn");
-conn(); // ✅ Connect to MongoDB
-
-
-
+// Routes
 const user = require("./routes/user");
 const Books = require("./routes/book");
 const Favourite = require("./routes/favourite");
 const Cart = require("./routes/cart");
 const Order = require("./routes/order");
 
-// Routes
-app.use("/api/v1", user); 
+app.use("/api/v1", user);
 app.use("/api/v1", Books);
-app.use("/api/v1", Favourite) ;
-app.use("/api/v1" , Cart);
+app.use("/api/v1", Favourite);
+app.use("/api/v1", Cart);
 app.use("/api/v1", Order);
-
-
 
 // Start Server
 app.listen(process.env.PORT, () => {
