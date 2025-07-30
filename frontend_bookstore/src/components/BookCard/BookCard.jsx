@@ -1,9 +1,13 @@
 import React from 'react'
+import { Link } from "react-router-dom";
 
-const BookCard = () => {
-    return (
-        <div>BookCard</div>
-    )
-}
+const BookCard = ({ data }) => {
+    console.log(data);
+    return (<>
+        <Link>
+            <div className='bg-'></div></Link>
+    </>
+    );
+};
 
-export default BookCard
+export default BookCard;
