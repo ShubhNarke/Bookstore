@@ -1,11 +1,15 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // only if you're using react-router
+import { Link, useNavigate } from "react-router-dom";
 
 const LogIn = () => {
     const [formData, setFormData] = useState({
-        email: "",
+        username: "",
         password: "",
     });
+
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({
@@ -14,10 +18,40 @@ const LogIn = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Form Submitted:", formData);
-        alert("LogIn Successful 🎉");
+        setLoading(true);
+        setMessage("");
+
+        try {
+            const res = await fetch("http://localhost:5000/api/v1/sign-in", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Login failed ❌");
+            }
+
+            // ✅ Save token
+            if (data.token) {
+                localStorage.setItem("token", data.token);
+            }
+
+            setMessage("✅ Login Successful 🎉");
+
+            // redirect after login
+            setTimeout(() => {
+                navigate("/");
+            }, 1000);
+        } catch (err) {
+            setMessage(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -27,16 +61,27 @@ const LogIn = () => {
                     Log In
                 </h2>
 
+                {message && (
+                    <p
+                        className={`text-center mb-4 ${message.startsWith("✅")
+                            ? "text-green-400"
+                            : "text-red-400"
+                            }`}
+                    >
+                        {message}
+                    </p>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Email */}
+                    {/* Username */}
                     <div>
-                        <label className="block text-zinc-100 mb-1">Email</label>
+                        <label className="block text-zinc-100 mb-1">Username</label>
                         <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
+                            type="text"
+                            name="username"
+                            value={formData.username}
                             onChange={handleChange}
-                            placeholder="xyz@example.com"
+                            placeholder="Enter your username"
                             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
                             required
                         />
@@ -59,9 +104,10 @@ const LogIn = () => {
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-200"
+                        disabled={loading}
+                        className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-200 disabled:opacity-50"
                     >
-                        Log In
+                        {loading ? "Logging In..." : "Log In"}
                     </button>
                 </form>
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MdOutlineSegment } from "react-icons/md";
+import { useSelector } from 'react-redux';
 
 const Navbar = () => {
     const links = [
@@ -10,6 +11,11 @@ const Navbar = () => {
         { title: "Profile", link: "/profile" },
     ];
 
+    const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+
+    if (isLoggedIn === false) {
+        links.splice(2, 2);
+    }
     const [MobileNav, setMobileNav] = useState("hidden");
 
     return (

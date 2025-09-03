@@ -1,12 +1,17 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ Import navigation hook
 
 const SignUp = () => {
     const [formData, setFormData] = useState({
-        name: "",
+        username: "",
         email: "",
         password: "",
         address: "",
     });
+
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
+    const navigate = useNavigate(); // ✅ Initialize navigation
 
     const handleChange = (e) => {
         setFormData({
@@ -15,10 +20,37 @@ const SignUp = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Form Submitted:", formData);
-        alert("Sign Up Successful 🎉");
+        setLoading(true);
+        setMessage("");
+
+        try {
+            const res = await fetch("http://localhost:5000/api/v1/sign-up", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Signup failed ❌");
+            }
+
+            // ✅ If success, show message briefly and navigate
+            setMessage("✅ Sign Up Successful 🎉");
+            setFormData({ username: "", email: "", password: "", address: "" });
+
+            // Navigate to login page after 1.5s
+            setTimeout(() => {
+                navigate("/login");
+            }, 1500);
+        } catch (err) {
+            setMessage(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -28,14 +60,25 @@ const SignUp = () => {
                     Sign Up
                 </h2>
 
+                {message && (
+                    <p
+                        className={`text-center mb-4 ${message.startsWith("✅")
+                                ? "text-green-400"
+                                : "text-red-400"
+                            }`}
+                    >
+                        {message}
+                    </p>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Name */}
+                    {/* Username */}
                     <div>
-                        <label className="block text-zinc-100 mb-1">username</label>
+                        <label className="block text-zinc-100 mb-1">Username</label>
                         <input
                             type="text"
-                            name="name"
-                            value={formData.name}
+                            name="username"
+                            value={formData.username}
                             onChange={handleChange}
                             placeholder="Enter your username"
                             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
@@ -51,7 +94,7 @@ const SignUp = () => {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
-                            placeholder="xyz@exmple.com"
+                            placeholder="xyz@example.com"
                             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
                             required
                         />
@@ -88,13 +131,14 @@ const SignUp = () => {
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-200"
+                        disabled={loading}
+                        className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-200 disabled:opacity-50"
                     >
-                        Sign Up
+                        {loading ? "Signing Up..." : "Sign Up"}
                     </button>
                 </form>
 
-                <p className="text-sm text-center text-gray-600 mt-4">
+                <p className="text-sm text-center text-gray-400 mt-4">
                     Already have an account?{" "}
                     <a href="/login" className="text-blue-500 hover:underline">
                         Log in

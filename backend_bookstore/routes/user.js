@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const {authenticateToken}= require("./userAuth");
+const { authenticateToken } = require("./userAuth");
 
 // ✅ Sign-up route
 router.post("/sign-up", async (req, res) => {
@@ -98,14 +98,14 @@ router.get("/get-user-information", authenticateToken, async (req, res) => {
 
 //  update address 
 
-router.put("/update-address", authenticateToken,async(req,res)=>{
+router.put("/update-address", authenticateToken, async (req, res) => {
   try {
-    const {id}= req.headers;
-    const{address} =req.body;
-    await User.findByIdAndUpdate(id,{address:address});
-    return res.status(200).json({message:"Address updated successfully"});
+    const { id } = req.headers;
+    const { address } = req.body;
+    await User.findByIdAndUpdate(id, { address: address });
+    return res.status(200).json({ message: "Address updated successfully" });
   } catch (error) {
-    res.status(500).json({message:"Interanl aserver error"})
+    res.status(500).json({ message: "Interanl aserver error" })
   };
 })
 module.exports = router;
