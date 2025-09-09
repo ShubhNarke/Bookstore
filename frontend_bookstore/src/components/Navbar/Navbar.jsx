@@ -37,12 +37,16 @@ const Navbar = () => {
                     </div>
 
                     {/* login and signup button */}
-                    <div className='hidden md:flex gap-4'>
-                        <Link to="/SignUp"
-                            className='px-2 py-1 border border-blue-500 hover:bg-white hover:text-zinc-500 transition-all duration-300'>SignUp</Link>
-                        <Link to="/LogIn"
-                            className='px-2 py-1 bg-blue-500 rounded hover:bg-white hover:text-zinc-500 transition-all duration-300'>LogIn</Link>
-                    </div>
+                    {isLoggedIn === false && (
+                        <>
+                            <div className='hidden md:flex gap-4'>
+                                <Link to="/SignUp"
+                                    className='px-2 py-1 border border-blue-500 hover:bg-white hover:text-zinc-500 transition-all duration-300'>SignUp</Link>
+                                <Link to="/LogIn"
+                                    className='px-2 py-1 bg-blue-500 rounded hover:bg-white hover:text-zinc-500 transition-all duration-300'>LogIn</Link>
+                            </div>
+                        </>
+                    )}
 
                     {/* Mobile toggle */}
                     <button

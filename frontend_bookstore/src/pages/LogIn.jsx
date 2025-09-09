@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { authActions } from "../store/auth";
+import { useDispatch } from "react-redux";
+import axios from "axios";
 
 const LogIn = () => {
-    const [formData, setFormData] = useState({
+    const [values, setValues] = useState({
         username: "",
         password: "",
     });
@@ -10,45 +13,56 @@ const LogIn = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
+    const change = (e) => {
+        const { name, value } = e.target;
+        setValues({ ...values, [name]: value });
     };
 
-    const handleSubmit = async (e) => {
+    const submit = async (e) => {
         e.preventDefault();
-        setLoading(true);
         setMessage("");
+        setLoading(true);
 
         try {
-            const res = await fetch("http://localhost:5000/api/v1/sign-in", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Login failed ❌");
+            if (values.username === "" || values.password === "") {
+                setMessage("❌ All fields are required");
+                return;
             }
 
-            // ✅ Save token
+            const response = await axios.post(
+                "http://localhost:5000/api/v1/sign-in", // ✅ fixed typo (was sing-in)
+                values
+            );
+
+            dispatch(authActions.login());
+            dispatch(authActions.changeRole(response.data.role));
+            localStorage.setItem("id", response.data.id);
+            localStorage.setItem("token", response.data.token);
+            localStorage.setItem("role", response.data.role);
+            navigate("/profile");
+
+            const data = response.data;
+            console.log("Login Response:", data);
+
+            // ✅ Save token & userId in localStorage
             if (data.token) {
                 localStorage.setItem("token", data.token);
             }
+            if (data.userId) {
+                localStorage.setItem("userId", data.userId);
+            }
 
-            setMessage("✅ Login Successful 🎉");
+            if (data.token) {
+                setMessage("✅ Login Successful 🎉");
 
-            // redirect after login
-            setTimeout(() => {
-                navigate("/");
-            }, 1000);
-        } catch (err) {
-            setMessage(err.message);
+            } else {
+                setMessage("❌ No token received from server");
+            }
+        } catch (error) {
+            console.error(error);
+            setMessage(error.response?.data?.message || "Login failed ❌");
         } finally {
             setLoading(false);
         }
@@ -72,15 +86,15 @@ const LogIn = () => {
                     </p>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={submit} className="space-y-4">
                     {/* Username */}
                     <div>
                         <label className="block text-zinc-100 mb-1">Username</label>
                         <input
                             type="text"
                             name="username"
-                            value={formData.username}
-                            onChange={handleChange}
+                            value={values.username}
+                            onChange={change}
                             placeholder="Enter your username"
                             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
                             required
@@ -93,8 +107,8 @@ const LogIn = () => {
                         <input
                             type="password"
                             name="password"
-                            value={formData.password}
-                            onChange={handleChange}
+                            value={values.password}
+                            onChange={change}
                             placeholder="Enter your password"
                             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
                             required
