@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ Import navigation hook
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
     const [formData, setFormData] = useState({
@@ -11,7 +11,7 @@ const SignUp = () => {
 
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
-    const navigate = useNavigate(); // ✅ Initialize navigation
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({
@@ -63,8 +63,8 @@ const SignUp = () => {
                 {message && (
                     <p
                         className={`text-center mb-4 ${message.startsWith("✅")
-                                ? "text-green-400"
-                                : "text-red-400"
+                            ? "text-green-400"
+                            : "text-red-400"
                             }`}
                     >
                         {message}
